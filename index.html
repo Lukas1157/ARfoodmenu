@@ -4,46 +4,45 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   
     <title>AR Scanner</title>
-     <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
-      <script src="https://raw.githack.com/AR-js-org/AR.js/dev/aframe/build/aframe-ar.js"></script>
-      
+
+    <script crossorigin="anonymous" src="./aframe-image-targets-example-main/external/scripts/8frame-1.5.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js" async crossorigin="anonymous" data-preload-chunks="slam"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@8thwall/landing-page@1/dist/landing-page.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js" crossorigin="anonymous"></script>
   </head>
-  <body style="margin : 0px; overflow: hidden;">
-  
-    <script type="module" src="/src/main.js"></script>
 
-   
-        <a-scene  vr-mode-ui="enabled: false;"  renderer="logarithmicDepthBuffer: true; antialias: true; shadowMapEnabled: true; shadowMapType: pcfsoft; toneMapping: ACESFilmic; toneMappingExposure: 1.2" embedded
-      arjs="trackingMethod: best; sourceType: webcam;debugUIEnabled: false;" >
-          <a-assets>
-    <a-asset-item id="schnitzel" src="./blender_models/pizza.gltf"></a-asset-item>
-  </a-assets>
-        <a-marker preset="hiro">
-            <a-entity
-            position="0 0 0"
-            rotation="0 0 0"
-            scale="0.05 0.05 0.05"
-            gltf-model="#schnitzel"
-            castShadow="true"
-            
-            animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"
-            ></a-entity>
-                  
-            
-        </a-marker>
-        <a-light type="directional"
-         position="1 2 1"
-         intensity="3"
-         color="#ffffff"
-        
-       ></a-light>
+  <body style="margin: 0px; overflow: hidden;">
+     <script type="module" src="./src/main.js"></script>
+    <script src="bundle.js"></script>
 
-    
-      
-        <a-entity camera></a-entity>
-        </a-scene>
-  
+    <a-scene
+      landing-page
+      xrextras-loading
+      xrextras-runtime-error
+      renderer="colorManagement: true"
+      xrweb="disableWorldTracking: true">
+
+      <a-assets>
+        <a-asset-item id="pizza-glb" src="blender_models/pizza.gltf"></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 4 10"></a-camera>
+
+      <a-light type="directional" intensity="3" position="1 2 1" color="#ffffff"></a-light>
+      <a-light type="ambient" intensity="1"></a-light>
+
+      <!-- "name" must match your image target name in the 8th Wall project dashboard -->
+      <xrextras-named-image-target name="pizzatracker">
+        <a-entity
+          gltf-model="#pizza-glb"
+          scale="0.05 0.05 0.05"
+          position="0 0 0"
+          rotation="90 0 0"
+          >
+        </a-entity>
+      </xrextras-named-image-target>
+
+    </a-scene>
   </body>
 </html>
