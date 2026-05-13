@@ -10,10 +10,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js" async crossorigin="anonymous" data-preload-chunks="slam"></script>
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/landing-page@1/dist/landing-page.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js" crossorigin="anonymous"></script>
+    <script type="module">
+  import { supabase } from './supabase.js';
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    const { data: Gerichte, error } = await supabase
+      .from('Gerichte')
+      .select('*');
+
+    console.log('Query error:', error);
+    console.log('Gerichte data:', Gerichte);
+    console.log('First row:', Gerichte?.[0]);
+
+const modelUrl = Gerichte?.[0]?.GTLF_url;
+    console.log('Model URL:', modelUrl);
+
+    const asset = document.querySelector('#pizza-glb');
+    if (!asset) return console.error('#pizza-glb not found');
+    if (!modelUrl) return console.error('modelUrl is empty or wrong');
+
+    asset.setAttribute('src', modelUrl);
+  });
+</script>
   </head>
 
   <body style="margin: 0px; overflow: hidden;">
-     <script type="module" src="./src/main.js"></script>
+     <!-- <script type="module" src="./src/main.js"></script> -->
     <script src="bundle.js"></script>
 
     <a-scene
@@ -24,7 +46,7 @@
       xrweb="disableWorldTracking: true">
 
       <a-assets>
-        <a-asset-item id="pizza-glb" src="blender_models/pizza.gltf"></a-asset-item>
+        <a-asset-item id="pizza-glb" src=""></a-asset-item>
       </a-assets>
 
       <a-camera position="0 4 10"></a-camera>
