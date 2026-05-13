@@ -18,18 +18,21 @@
       .from('Gerichte')
       .select('*');
 
-    console.log('Query error:', error);
-    console.log('Gerichte data:', Gerichte);
-    console.log('First row:', Gerichte?.[0]);
+    const modelUrl = Gerichte?.[0]?.GTLF_url;
+    
 
-const modelUrl = Gerichte?.[0]?.GTLF_url;
-    console.log('Model URL:', modelUrl);
-
-    const asset = document.querySelector('#pizza-glb');
-    if (!asset) return console.error('#pizza-glb not found');
     if (!modelUrl) return console.error('modelUrl is empty or wrong');
 
-    asset.setAttribute('src', modelUrl);
+    // Set the gltf-model directly on the entity
+    const entity = document.querySelector('[gltf-model]');
+    
+
+    if (entity) {
+      entity.setAttribute('gltf-model', modelUrl);
+      
+    } else {
+      console.error('[gltf-model] entity not found');
+    }
   });
 </script>
   </head>
@@ -45,10 +48,6 @@ const modelUrl = Gerichte?.[0]?.GTLF_url;
       renderer="colorManagement: true"
       xrweb="disableWorldTracking: true">
 
-      <a-assets>
-        <a-asset-item id="pizza-glb" src=""></a-asset-item>
-      </a-assets>
-
       <a-camera position="0 4 10"></a-camera>
 
       <a-light type="directional" intensity="3" position="1 2 1" color="#ffffff"></a-light>
@@ -57,7 +56,7 @@ const modelUrl = Gerichte?.[0]?.GTLF_url;
       <!-- "name" must match your image target name in the 8th Wall project dashboard -->
       <xrextras-named-image-target name="pizzatracker">
         <a-entity
-          gltf-model="#pizza-glb"
+          gltf-model=""
           scale="0.05 0.05 0.05"
           position="0 0 0"
           rotation="90 0 0"
