@@ -1,0 +1,118 @@
+#UI {
+position: absolute;
+left: 1rem;
+right: 1rem;
+bottom: 0;
+display: flex;
+flex-direction: column;
+z-index: 1000;
+pointer-events: none;
+}
+
+#info {
+color: white;
+background: #101118;
+padding: 0.5rem 1rem;
+border-radius: 24px 24px 0 0;
+
+}
+
+.topinfo
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#foodname {
+    font-family: Inter;
+    color: #FFA600;
+font-size: 20px;
+font-weight: 700;
+line-height: normal;
+}
+
+#price {
+      font-family: Inter;
+    color: #FFA600;
+font-size: 20px;
+font-style: bold;
+font-weight: 700;
+line-height: normal;
+}
+
+#description {
+      font-family: Inter;
+    margin-top: -1rem;
+    font-weight: 400;
+    font-size:13px;
+    color: #FFFFFF;
+}
+
+#allergyinfo {
+    color: #ffffff;
+    font-family: Inter;
+font-size: 10px;
+font-style: normal;
+font-weight: 100;
+line-height: normal;
+margin-top: 1.5rem;
+}
+
+#whitebar{
+background: #FFFFFF;
+height: 0.1rem;
+}
+
+#selectionscroll{
+background: #101118;
+color: white;
+display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 1rem 0px 1rem;
+}
+
+#images{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+   
+}
+
+.thumbnail{
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 0.5rem;
+    object-fit: cover;
+     padding: 1rem 0.25rem 1rem 0.25rem;
+}
+
+#menubar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+background: #303344;
+color: #B3B3B3;
+font-size:13px;
+padding: 1rem 1rem 0 1rem;
+  font-family: Inter;
+    font-weight: 400;
+  
+
+}
+
+.menubaricon{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.menubaricon p{
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+
+

@@ -10,18 +10,26 @@
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js" async crossorigin="anonymous" data-preload-chunks="slam"></script>
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/landing-page@1/dist/landing-page.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <script type="module">
   import { supabase } from './supabase.js';
 
   window.addEventListener('DOMContentLoaded', async () => {
     const { data: Gerichte, error } = await supabase
       .from('Gerichte')
-      .select('*');
+      .select('*')
+      .order('id', { ascending: true })
 
     const modelUrl = Gerichte?.[0]?.GTLF_url;
-    
-
-    if (!modelUrl) return console.error('modelUrl is empty or wrong');
+    const foodname = Gerichte?.[0]?.Name;
+    const description = Gerichte?.[0]?.Beschreibung;
+    const price = Gerichte?.[0]?.Preis;
+    const allergyinfo = Gerichte?.[0]?.Hinweise;
+    const type = Gerichte?.[0]?.Art_der_Speise;
+    const image = Gerichte?.[0]?.Thumbnail_url;
 
     // Set the gltf-model directly on the entity
     const entity = document.querySelector('[gltf-model]');
@@ -33,6 +41,14 @@
     } else {
       console.error('[gltf-model] entity not found');
     }
+
+    // Update the info display
+    document.getElementById('foodname').textContent = foodname;
+    document.getElementById('description').textContent = description;
+    document.getElementById('price').textContent = price + " €";
+    document.getElementById('allergyinfo').textContent = allergyinfo;
+    document.getElementById('thumbnail1').src = image;
+    
   });
 </script>
   </head>
@@ -40,6 +56,56 @@
   <body style="margin: 0px; overflow: hidden;">
      <!-- <script type="module" src="./src/main.js"></script> -->
     <script src="bundle.js"></script>
+<div id="UI">
+
+<div id="info">
+      <div class="topinfo">
+<p id="foodname">Food Name</p>
+      <p id="price">Price</p>
+      </div>
+      
+      <p id="description">Description</p>
+      
+      <p id="allergyinfo">Allergy Information</p>
+      </div>
+      <div id="whitebar"></div>
+
+      
+      <div id="selectionscroll">
+<img src="icons/buttonleft.svg">
+<div id ="images">
+<img id="thumbnail1" class="thumbnail" src="">
+<img id="thumbnail2" class="thumbnail" src="">
+<img id="thumbnail3" class="thumbnail" src="">
+      </div>
+<img src="icons/buttonright.svg">
+      </div>
+
+
+      <div id ="menubar">
+        <div class="menubaricon">
+          <img src="icons/vorspeisen.svg">
+          <p>Vorspeisen</p>
+        </div>
+        <div class="menubaricon">
+          <img src="icons/hauptspeisen.svg">
+<p>Hauptspeisen</p>
+        </div>
+        <div class="menubaricon">
+          <img src="icons/getränke.svg">
+<p>Getränke</p>
+        </div>
+        <div class="menubaricon">
+          <img src="icons/desserts.svg">
+<p>Desserts</p>
+        </div>
+
+      </div>
+
+    </div>
+
+
+
 
     <a-scene
       landing-page
@@ -57,7 +123,7 @@
       <xrextras-named-image-target name="pizzatracker">
         <a-entity
           gltf-model=""
-          scale="0.05 0.05 0.05"
+          scale="1 1 1"
           position="0 0 0"
           rotation="90 0 0"
           >
@@ -65,5 +131,7 @@
       </xrextras-named-image-target>
 
     </a-scene>
+    
+    
   </body>
 </html>
