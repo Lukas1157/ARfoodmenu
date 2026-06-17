@@ -17,8 +17,9 @@
     <script type="module">
   import { supabase } from './supabase.js';
 
+  // Warten, bis das HTML vollständig geladen ist, bevor wir auf Elemente zugreifen.
   window.addEventListener('DOMContentLoaded', async () => {
-    // Datenbank importieren
+    // Daten aus der Supabase-Tabelle 'Gerichte' laden und nach ID sortieren.
     const { data: Gerichte, error } = await supabase
       .from('Gerichte')
       .select('*')
@@ -29,7 +30,7 @@
       return;
     }
 
-    // Filterarrays für jede Kategorie erstellen
+    // Gerichte nach Kategorien in eigene Listen aufteilen.
     const categories = {
       vorspeisen: Gerichte?.filter(gericht => gericht.Art_der_Speise === 'Vorspeise'),
       hauptspeisen: Gerichte?.filter(gericht => gericht.Art_der_Speise === 'Hauptspeise'),
@@ -37,7 +38,7 @@
       desserts: Gerichte?.filter(gericht => gericht.Art_der_Speise === 'Dessert'),
     };
 
-    // UI-Elemente referenzieren
+    // Referenzen auf die UI-Elemente speichern, die wir später aktualisieren.
     const entity = document.querySelector('[gltf-model]');
     const foodnameEl = document.getElementById('foodname');
     const descriptionEl = document.getElementById('description');
@@ -49,10 +50,12 @@
     const buttonLeft = document.getElementById('buttonleft');
     const buttonRight = document.getElementById('buttonright');
 
+    // Aktuelle Kategorie und Positionen für die Vorschau speichern.
     let currentCategoryKey = 'vorspeisen';
     let currentStartIndex = 0;
     let selectedIndex = 0;
 
+    // Zeigt ein ausgewähltes Gericht im AR-Modell und in den Textfeldern an.
     function updateDish(gericht) {
       if (!gericht) return;
 
@@ -66,13 +69,17 @@
       allergyinfoEl.textContent = gericht.Hinweise || 'Keine Allergieinformationen.';
     }
 
+    // Aktualisiert die drei Vorschaubilder unterhalb des AR-Inhalts.
     function updateThumbnails(list, startIndex) {
       [thumbnail1El, thumbnail2El, thumbnail3El].forEach((thumbEl, offset) => {
         const item = list[startIndex + offset];
         thumbEl.src = item?.Thumbnail_url || '';
+        const itemIndex = startIndex + offset;
+        thumbEl.classList.toggle('active-thumbnail', itemIndex === selectedIndex);
       });
     }
 
+    // Steuert die Sichtbarkeit und Interaktion der Pfeil-Buttons.
     function updateNavigation(list) {
       if (!buttonLeft || !buttonRight) return;
 
@@ -83,6 +90,13 @@
       buttonRight.style.pointerEvents = currentStartIndex >= maxStartIndex ? 'none' : 'auto';
     }
 
+    function setActiveMenuItem(categoryKey) {
+      document.querySelectorAll('.menubaricon').forEach(item => {
+        item.classList.toggle('active', item.id === categoryKey);
+      });
+    }
+
+    // Zeigt eine komplette Kategorie und ihre erste Vorschau an.
     function showCategory(categoryKey) {
       currentCategoryKey = categoryKey;
       currentStartIndex = 0;
@@ -93,11 +107,13 @@
         return;
       }
 
+      setActiveMenuItem(categoryKey);
       updateDish(list[selectedIndex]);
       updateThumbnails(list, currentStartIndex);
       updateNavigation(list);
     }
 
+    // Verschiebt die angezeigten Thumbnails nach links oder rechts.
     function moveThumbnails(direction) {
       const list = categories[currentCategoryKey];
       if (!list || list.length === 0) return;
@@ -111,6 +127,7 @@
       updateNavigation(list);
     }
 
+    // Wählt eines der drei aktuell sichtbaren Thumbnails aus und zeigt es an.
     function selectThumbnail(offset) {
       const list = categories[currentCategoryKey];
       if (!list || list.length === 0) return;
@@ -120,20 +137,23 @@
 
       selectedIndex = index;
       updateDish(list[selectedIndex]);
+      updateThumbnails(list, currentStartIndex);
     }
 
+    // Event-Listener für die Kategorie-Buttons.
     document.getElementById('vorspeisen')?.addEventListener('click', () => showCategory('vorspeisen'));
     document.getElementById('hauptspeisen')?.addEventListener('click', () => showCategory('hauptspeisen'));
     document.getElementById('getränke')?.addEventListener('click', () => showCategory('getränke'));
     document.getElementById('desserts')?.addEventListener('click', () => showCategory('desserts'));
 
+    // Event-Listener für die Navigation der Thumbnails.
     buttonLeft?.addEventListener('click', () => moveThumbnails(-1));
     buttonRight?.addEventListener('click', () => moveThumbnails(1));
     thumbnail1El?.addEventListener('click', () => selectThumbnail(0));
     thumbnail2El?.addEventListener('click', () => selectThumbnail(1));
     thumbnail3El?.addEventListener('click', () => selectThumbnail(2));
 
-    // Standardmäßig die erste Vorspeise anzeigen
+    // Beim Laden der Seite direkt die erste Kategorie und ihr erstes Gericht anzeigen.
     showCategory('vorspeisen');
   });
 </script>
@@ -163,8 +183,8 @@
         </div>
 <div id ="images">
 <img id="thumbnail1" class="thumbnail" src="">
-<img id="thumbnail2" class="thumbnail" src="">
-<img id="thumbnail3" class="thumbnail" src="">
+<img id="thumbnail2" class="thumbnail"  src="">
+<img id="thumbnail3" class="thumbnail"  src="">
       </div>
       <div id="buttonright">
         <img src="icons/buttonright.svg">
