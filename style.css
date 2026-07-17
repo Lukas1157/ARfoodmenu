@@ -1,145 +1,228 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Basis-Layout
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 #UI {
-position: absolute;
-left: 1rem;
-right: 1rem;
-bottom: 0;
-display: flex;
-flex-direction: column;
-z-index: 1000;
-pointer-events: auto;
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  pointer-events: auto;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Collapsible Panel
+   Sitzt über der Menubar. Wird per Drag nach unten weggezogen.
+   z-index MUSS kleiner als #menubar sein, damit die Menubar den
+   eingeklappten Rest verdeckt.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#collapsible {
+  position: relative;
+  z-index: 1;
+  will-change: transform;
+  /* touch-action: none verhindert Seiten-Scroll während des Drags */
+  touch-action: pan-x;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Drag-Handle  (sichtbarer "Peek" wenn Panel eingeklappt)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#drag-handle {
+  background: #101118;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+   border-radius: 50px 50px 0 0;
+  /* Weiche Trennlinie zum selectionscroll */
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+#drag-handle:active {
+  cursor: grabbing;
+}
+
+#drag-pill {
+  width: 2.5rem;
+  height: 4px;
+  background: #4a4d5e;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+#drag-handle:active #drag-pill {
+  background: #6b6f85;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Info-Bereich
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 #info {
-color: white;
-background: #101118;
-padding: 0.5rem 1rem;
-border-radius: 24px 24px 0 0;
-height: 9rem;
-
+  color: white;
+  background: #101118;
+  padding: 0.5rem 1rem;
+  height: 9rem;
 }
 
-.topinfo
-{
-    display: flex;
-    justify-content: space-between;
-    
+.topinfo {
+  display: flex;
+  justify-content: space-between;
 }
 
 #foodname {
-    font-family: Inter;
-    color: #FFA600;
-font-size: 20px;
-font-weight: 700;
-line-height: normal;
+  font-family: Inter;
+  color: #FFA600;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: normal;
 }
 
 #price {
-      font-family: Inter;
-    color: #FFA600;
-font-size: 20px;
-font-style: bold;
-font-weight: 700;
-line-height: normal;
+  font-family: Inter;
+  color: #FFA600;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: normal;
 }
 
 #description {
-      font-family: Inter;
-    margin-top: -1rem;
-    font-weight: 400;
-    font-size:13px;
-    color: #FFFFFF;
+  font-family: Inter;
+  margin-top: -1rem;
+  font-weight: 400;
+  font-size: 13px;
+  color: #FFFFFF;
 }
 
 #allergyinfo {
-    color: #ffffff;
-    font-family: Inter;
-font-size: 10px;
-font-style: normal;
-font-weight: 100;
-line-height: normal;
-margin-top: 1.5rem;
-bottom:0;
-}
-
-#whitebar{
-background: #FFFFFF;
-height: 0.1rem;
-}
-
-#selectionscroll{
-background: #101118;
-color: white;
-display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0px 1rem 0px 1rem;
-}
-
-#images{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0.25rem 1rem 0.25rem;
-   
-}
-
-.thumbnail{
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 0.5rem;
-    object-fit: cover;
-    padding: 0.25rem 0.25rem 0.25rem 0.25rem;
-     
-}
-
-#menubar{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-background: #303344;
-color: #B3B3B3;
-font-size:13px;
-padding: 1rem 1rem 0 1rem;
+  color: #ffffff;
   font-family: Inter;
-    font-weight: 400;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 100;
+  line-height: normal;
+  margin-top: 1.5rem;
 }
 
-.menubaricon{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #B3B3B3;
+/* ═══════════════════════════════════════════════════════════════════════════
+   Whitebar
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#whitebar {
+  background: #FFFFFF;
+  height: 0.1rem;
 }
 
-.menubaricon img{
-    filter: grayscale(1);
+/* ═══════════════════════════════════════════════════════════════════════════
+   Thumbnail-Auswahl
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#selectionscroll {
+  background: #101118;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
 }
 
-.menubaricon p{
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-    color: inherit;
+#images {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0.25rem;
 }
 
-.menubaricon.active{
-    color: #FFA600;
+.thumbnail {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  padding: 0.25rem;
 }
 
-.menubaricon.active img{
-    filter: none;
+.thumbnail.active-thumbnail {
+  outline: 2px solid #FFA600;
+  outline-offset: -3px;
 }
 
 #buttonleft,
 #buttonright {
-    cursor: pointer;
+  cursor: pointer;
 }
 
-.thumbnail.active-thumbnail {
-    outline: 2px solid #FFA600;
-    outline-offset: -3px;
+/* ═══════════════════════════════════════════════════════════════════════════
+   Menubar
+   Muss z-index > #collapsible haben, damit sie den weggezogenen Panel
+   visuell verdeckt. Nur der Drag-Handle bleibt als "Peek" sichtbar.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#menubar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #303344;
+  color: #B3B3B3;
+  font-size: 13px;
+  padding: 1rem 1rem 0 1rem;
+  font-family: Inter;
+  font-weight: 400;
 }
 
+.menubaricon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #B3B3B3;
+}
 
+.menubaricon img {
+  filter: grayscale(1);
+  pointer-events: none;
+}
 
+.menubaricon p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  color: inherit;
+  pointer-events: none;
+}
+
+.menubaricon.active {
+  color: #FFA600;
+}
+
+.menubaricon.active img {
+  filter: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Panel-Hintergrund-Filler
+   Kind von #collapsible → bewegt sich automatisch mit.
+   Absolut positioniert unterhalb des Panels, füllt den Rubber-Band-Gap
+   wenn das Panel nach oben gezogen wird.
+   #menubar (z-index 2) verdeckt ihn, wenn kein Gap vorhanden.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#panel-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -160px;   /* liegt direkt unter dem Panel und reicht 160 px nach unten */
+  height: 160px;    /* mehr als genug fuer den max. Rubber-Band-Ausschlag */
+  background: #101118;
+  pointer-events: none;
+  z-index: 10000;
+}

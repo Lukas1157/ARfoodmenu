@@ -12,210 +12,364 @@
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
     <script type="module">
-  import { supabase } from './supabase.js';
+      import { supabase } from './supabase.js';
 
-  // Warten, bis das HTML vollständig geladen ist, bevor wir auf Elemente zugreifen.
-  window.addEventListener('DOMContentLoaded', async () => {
-    // Daten aus der Supabase-Tabelle 'Gerichte' laden und nach ID sortieren.
-    const { data: Gerichte, error } = await supabase
-      .from('Gerichte')
-      .select('*')
-      .order('id', { ascending: true });
+      window.addEventListener('DOMContentLoaded', async () => {
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return;
-    }
+        // ── Supabase laden ────────────────────────────────────────────────────────
+        const { data: Gerichte, error } = await supabase
+          .from('Gerichte')
+          .select('*')
+          .order('id', { ascending: true });
 
-    // Gerichte nach Kategorien in eigene Listen aufteilen.
-    const categories = {
-      vorspeisen: Gerichte?.filter(gericht => gericht.Art_der_Speise === 'Vorspeise'),
-      hauptspeisen: Gerichte?.filter(gericht => gericht.Art_der_Speise === 'Hauptspeise'),
-      getränke: Gerichte?.filter(gericht => gericht.Art_der_Speise === 'Getränk'),
-      desserts: Gerichte?.filter(gericht => gericht.Art_der_Speise === 'Dessert'),
-    };
+        if (error) {
+          console.error('Supabase error:', error);
+          return;
+        }
 
-    // Referenzen auf die UI-Elemente speichern, die wir später aktualisieren.
-    const entity = document.querySelector('[gltf-model]');
-    const foodnameEl = document.getElementById('foodname');
-    const descriptionEl = document.getElementById('description');
-    const priceEl = document.getElementById('price');
-    const allergyinfoEl = document.getElementById('allergyinfo');
-    const thumbnail1El = document.getElementById('thumbnail1');
-    const thumbnail2El = document.getElementById('thumbnail2');
-    const thumbnail3El = document.getElementById('thumbnail3');
-    const buttonLeft = document.getElementById('buttonleft');
-    const buttonRight = document.getElementById('buttonright');
+        // ── Kategorien ────────────────────────────────────────────────────────────
+        const categories = {
+          vorspeisen:   Gerichte?.filter(g => g.Art_der_Speise === 'Vorspeise'),
+          hauptspeisen: Gerichte?.filter(g => g.Art_der_Speise === 'Hauptspeise'),
+          'getr\u00e4nke':    Gerichte?.filter(g => g.Art_der_Speise === 'Getr\u00e4nk'),
+          desserts:     Gerichte?.filter(g => g.Art_der_Speise === 'Dessert'),
+        };
 
-    // Aktuelle Kategorie und Positionen für die Vorschau speichern.
-    let currentCategoryKey = 'vorspeisen';
-    let currentStartIndex = 0;
-    let selectedIndex = 0;
+        // ── DOM-Referenzen ────────────────────────────────────────────────────────
+        const entity        = document.querySelector('[gltf-model]');
+        const foodnameEl    = document.getElementById('foodname');
+        const descriptionEl = document.getElementById('description');
+        const priceEl       = document.getElementById('price');
+        const allergyEl     = document.getElementById('allergyinfo');
+        const thumb1        = document.getElementById('thumbnail1');
+        const thumb2        = document.getElementById('thumbnail2');
+        const thumb3        = document.getElementById('thumbnail3');
+        const buttonLeft    = document.getElementById('buttonleft');
+        const buttonRight   = document.getElementById('buttonright');
 
-    // Zeigt ein ausgewähltes Gericht im AR-Modell und in den Textfeldern an.
-    function updateDish(gericht) {
-      if (!gericht) return;
+        // ── State ─────────────────────────────────────────────────────────────────
+        let currentCategoryKey = 'vorspeisen';
+        let currentStartIndex  = 0;
+        let selectedIndex      = 0;
 
-      if (entity) {
-        entity.setAttribute('gltf-model', gericht.GTLF_url || '');
-      }
+        // ── Gericht anzeigen ──────────────────────────────────────────────────────
+        function updateDish(gericht) {
+          if (!gericht) return;
+          if (entity) entity.setAttribute('gltf-model', gericht.GTLF_url || '');
+          foodnameEl.textContent    = gericht.Name          || 'Unbekanntes Gericht';
+          descriptionEl.textContent = gericht.Beschreibung  || 'Keine Beschreibung verfügbar.';
+          priceEl.textContent       = gericht.Preis != null ? `${gericht.Preis}\u20ac` : 'Preis nicht verfügbar';
+          allergyEl.textContent     = gericht.Hinweise      || 'Keine Allergieinformationen.';
+        }
 
-      foodnameEl.textContent = gericht.Name || 'Unbekanntes Gericht';
-      descriptionEl.textContent = gericht.Beschreibung || 'Keine Beschreibung verfügbar.';
-      priceEl.textContent = (gericht.Preis != null ? `${gericht.Preis}€` : 'Preis nicht verfügbar');
-      allergyinfoEl.textContent = gericht.Hinweise || 'Keine Allergieinformationen.';
-    }
+        // ── Thumbnails rendern ────────────────────────────────────────────────────
+        function updateThumbnails(list, startIndex) {
+          [thumb1, thumb2, thumb3].forEach((el, offset) => {
+            const item = list[startIndex + offset];
+            el.src = item?.Thumbnail_url || '';
+            el.classList.toggle('active-thumbnail', startIndex + offset === selectedIndex);
+          });
+        }
 
-    // Aktualisiert die drei Vorschaubilder unterhalb des AR-Inhalts.
-    function updateThumbnails(list, startIndex) {
-      [thumbnail1El, thumbnail2El, thumbnail3El].forEach((thumbEl, offset) => {
-        const item = list[startIndex + offset];
-        thumbEl.src = item?.Thumbnail_url || '';
-        const itemIndex = startIndex + offset;
-        thumbEl.classList.toggle('active-thumbnail', itemIndex === selectedIndex);
+        // ── Navigations-Buttons aktualisieren ─────────────────────────────────────
+        function updateNavigation(list) {
+          if (!buttonLeft || !buttonRight) return;
+          const max = Math.max(0, list.length - 3);
+          buttonLeft.style.opacity       = currentStartIndex <= 0   ? '0.35' : '1';
+          buttonRight.style.opacity      = currentStartIndex >= max  ? '0.35' : '1';
+          buttonLeft.style.pointerEvents = currentStartIndex <= 0   ? 'none' : 'auto';
+          buttonRight.style.pointerEvents= currentStartIndex >= max  ? 'none' : 'auto';
+        }
+
+        // ── Aktives Menü-Icon setzen ──────────────────────────────────────────────
+        function setActiveMenuItem(key) {
+          document.querySelectorAll('.menubaricon').forEach(item =>
+            item.classList.toggle('active', item.id === key)
+          );
+        }
+
+        // ── Kategorie wechseln ────────────────────────────────────────────────────
+        function showCategory(key) {
+          currentCategoryKey = key;
+          currentStartIndex  = 0;
+          selectedIndex      = 0;
+          const list = categories[key];
+          if (!list || list.length === 0) {
+            console.warn(`Keine Gerichte für Kategorie "${key}" gefunden.`);
+            return;
+          }
+          setActiveMenuItem(key);
+          updateDish(list[0]);
+          updateThumbnails(list, 0);
+          updateNavigation(list);
+        }
+
+        // ── Thumbnail-Fenster verschieben ─────────────────────────────────────────
+        function moveThumbnails(direction) {
+          const list = categories[currentCategoryKey];
+          if (!list || list.length === 0) return;
+          const max  = Math.max(0, list.length - 3);
+          const next = currentStartIndex + direction;
+          if (next < 0 || next > max) return;
+          currentStartIndex = next;
+          updateThumbnails(list, currentStartIndex);
+          updateNavigation(list);
+        }
+
+        // ── Thumbnail auswählen ───────────────────────────────────────────────────
+        function selectThumbnail(offset) {
+          const list  = categories[currentCategoryKey];
+          if (!list || list.length === 0) return;
+          const index = currentStartIndex + offset;
+          if (index < 0 || index >= list.length) return;
+          selectedIndex = index;
+          updateDish(list[selectedIndex]);
+          updateThumbnails(list, currentStartIndex);
+        }
+
+        // ── Event-Listener: Kategorie ─────────────────────────────────────────────
+        document.getElementById('vorspeisen')  ?.addEventListener('click', () => showCategory('vorspeisen'));
+        document.getElementById('hauptspeisen')?.addEventListener('click', () => showCategory('hauptspeisen'));
+        document.getElementById('getr\u00e4nke')      ?.addEventListener('click', () => showCategory('getr\u00e4nke'));
+        document.getElementById('desserts')    ?.addEventListener('click', () => showCategory('desserts'));
+
+        // ── Event-Listener: Navigation + Thumbnails ───────────────────────────────
+        buttonLeft ?.addEventListener('click', () => moveThumbnails(-1));
+        buttonRight?.addEventListener('click', () => moveThumbnails(+1));
+        thumb1?.addEventListener('click', () => selectThumbnail(0));
+        thumb2?.addEventListener('click', () => selectThumbnail(1));
+        thumb3?.addEventListener('click', () => selectThumbnail(2));
+
+        // ── Start ─────────────────────────────────────────────────────────────────
+        showCategory('vorspeisen');
+
+        // ── Drag-to-Collapse Panel ────────────────────────────────────────────────
+        initDragPanel();
       });
-    }
 
-    // Steuert die Sichtbarkeit und Interaktion der Pfeil-Buttons.
-    function updateNavigation(list) {
-      if (!buttonLeft || !buttonRight) return;
+      // ════════════════════════════════════════════════════════════════════════════
+      //  Drag-Panel-Logik
+      //  Der Drag-Listener hängt nur am #drag-handle, damit Thumbnails und
+      //  Menü-Buttons weiterhin normale Klick-Events empfangen.
+      // ════════════════════════════════════════════════════════════════════════════
+      function initDragPanel() {
+        const collapsible = document.getElementById('collapsible');
+        const dragHandle  = document.getElementById('drag-handle');
 
-      const maxStartIndex = Math.max(0, list.length - 3);
-      buttonLeft.style.opacity = currentStartIndex <= 0 ? '0.35' : '1';
-      buttonRight.style.opacity = currentStartIndex >= maxStartIndex ? '0.35' : '1';
-      buttonLeft.style.pointerEvents = currentStartIndex <= 0 ? 'none' : 'auto';
-      buttonRight.style.pointerEvents = currentStartIndex >= maxStartIndex ? 'none' : 'auto';
-    }
+        // Wieviel vom Panel noch über der Menubar sichtbar bleibt (= Handle-Höhe)
+        const PEEK_HEIGHT = dragHandle.offsetHeight || 40;
 
-    function setActiveMenuItem(categoryKey) {
-      document.querySelectorAll('.menubaricon').forEach(item => {
-        item.classList.toggle('active', item.id === categoryKey);
-      });
-    }
+        // Erst wenn >62 % der Strecke gezogen, klappt das Panel ein.
+        // Wert nah an 1.0 = Snap-Punkt sehr weit unten = schwer einzuklappen.
+        const SNAP_THRESHOLD = 0.62;
 
-    // Zeigt eine komplette Kategorie und ihre erste Vorschau an.
-    function showCategory(categoryKey) {
-      currentCategoryKey = categoryKey;
-      currentStartIndex = 0;
-      selectedIndex = 0;
-      const list = categories[categoryKey];
-      if (!list || list.length === 0) {
-        console.warn(`Keine Gerichte für Kategorie ${categoryKey} gefunden.`);
-        return;
+        // Schnelle Wischgeste snappt in Wischrichtung (px/ms)
+        const VELOCITY_SNAP = 0.4;
+
+        // Rubber-Band-Dämpfung an den Grenzen
+        const RUBBER = 0.12;
+
+        let isOpen         = true;
+        let isDragging     = false;
+        let dragStartY     = 0;
+        let startTranslate = 0;
+        let currentY       = 0;  // aktueller translateY-Wert (px)
+        let maxY           = 0;  // Strecke vom offenen bis zum geschlossenen Zustand
+
+        let lastPointerY   = 0;
+        let lastPointerT   = 0;
+        let velocity       = 0;  // px/ms, positiv = nach unten
+
+        // ── Hilfsfunktionen ──────────────────────────────────────────────────────
+        function calcMax() {
+          maxY = collapsible.offsetHeight - PEEK_HEIGHT;
+        }
+
+        function setY(y, animated = false) {
+          collapsible.style.transition = animated
+            ? 'transform 0.42s cubic-bezier(0.32, 0.72, 0, 1)'
+            : 'none';
+          collapsible.style.transform = `translateY(${y}px)`;
+          currentY = y;
+        }
+
+        function snap(open) {
+          isOpen = open;
+          setY(open ? 0 : maxY, true);
+        }
+
+        // ── Drag-Start ────────────────────────────────────────────────────────────
+        function onStart(pointerY) {
+          calcMax();
+          isDragging     = true;
+          dragStartY     = pointerY;
+          startTranslate = currentY;
+          lastPointerY   = pointerY;
+          lastPointerT   = Date.now();
+          velocity       = 0;
+          collapsible.style.transition = 'none';
+        }
+
+        // ── Drag-Bewegung ─────────────────────────────────────────────────────────
+        function onMove(pointerY) {
+          if (!isDragging) return;
+
+          // Geschwindigkeit tracken (gleitender Mittelwert)
+          const now = Date.now();
+          const dt  = now - lastPointerT;
+          if (dt > 0) velocity = (pointerY - lastPointerY) / dt;
+          lastPointerY = pointerY;
+          lastPointerT = now;
+
+          const raw = startTranslate + (pointerY - dragStartY);
+
+          // Rubber-Band an den Grenzen
+          let clamped;
+          if (raw < 0) {
+            clamped = raw * RUBBER;
+          } else if (raw > maxY) {
+            clamped = maxY + (raw - maxY) * RUBBER;
+          } else {
+            clamped = raw;
+          }
+
+          collapsible.style.transform = `translateY(${clamped}px)`;
+          currentY = clamped;
+        }
+
+        // ── Drag-Ende / Snap-Entscheidung ────────────────────────────────────────
+        function onEnd(pointerY) {
+          if (!isDragging) return;
+          isDragging = false;
+
+          const totalTravel = Math.abs(pointerY - dragStartY);
+
+          // Tap (kaum Bewegung) → Panel umschalten
+          if (totalTravel < 8) {
+            snap(!isOpen);
+            return;
+          }
+
+          // Schnelle Geste → Richtung entscheidet
+          if (Math.abs(velocity) > VELOCITY_SNAP) {
+            snap(velocity < 0);   // nach oben = öffnen
+            return;
+          }
+
+          // Positions-basierter Snap:
+          // normalisierter Wert zwischen 0 (offen) und 1 (geschlossen)
+          const normalised = Math.max(0, Math.min(maxY, currentY)) / maxY;
+          snap(normalised <= SNAP_THRESHOLD);
+        }
+
+        // ── Touch-Events (nur am Handle) ──────────────────────────────────────────
+        dragHandle.addEventListener('touchstart', e => {
+          onStart(e.touches[0].clientY);
+        }, { passive: true });
+
+        // touchmove auf document: bleibt aktiv auch wenn Finger das Element verlässt
+        document.addEventListener('touchmove', e => {
+          if (!isDragging) return;
+          e.preventDefault();          // Seiten-Scroll unterdrücken
+          onMove(e.touches[0].clientY);
+        }, { passive: false });
+
+        document.addEventListener('touchend', e => {
+          if (!isDragging) return;
+          onEnd(e.changedTouches[0].clientY);
+        });
+
+        // ── Maus-Events (Desktop-Testing) ─────────────────────────────────────────
+        dragHandle.addEventListener('mousedown', e => {
+          e.preventDefault();
+          onStart(e.clientY);
+        });
+
+        document.addEventListener('mousemove', e => {
+          if (isDragging) onMove(e.clientY);
+        });
+
+        document.addEventListener('mouseup', e => {
+          if (isDragging) onEnd(e.clientY);
+        });
       }
-
-      setActiveMenuItem(categoryKey);
-      updateDish(list[selectedIndex]);
-      updateThumbnails(list, currentStartIndex);
-      updateNavigation(list);
-    }
-
-    // Verschiebt die angezeigten Thumbnails nach links oder rechts.
-    function moveThumbnails(direction) {
-      const list = categories[currentCategoryKey];
-      if (!list || list.length === 0) return;
-
-      const maxStartIndex = Math.max(0, list.length - 3);
-      const nextIndex = currentStartIndex + direction;
-      if (nextIndex < 0 || nextIndex > maxStartIndex) return;
-
-      currentStartIndex = nextIndex;
-      updateThumbnails(list, currentStartIndex);
-      updateNavigation(list);
-    }
-
-    // Wählt eines der drei aktuell sichtbaren Thumbnails aus und zeigt es an.
-    function selectThumbnail(offset) {
-      const list = categories[currentCategoryKey];
-      if (!list || list.length === 0) return;
-
-      const index = currentStartIndex + offset;
-      if (index < 0 || index >= list.length) return;
-
-      selectedIndex = index;
-      updateDish(list[selectedIndex]);
-      updateThumbnails(list, currentStartIndex);
-    }
-
-    // Event-Listener für die Kategorie-Buttons.
-    document.getElementById('vorspeisen')?.addEventListener('click', () => showCategory('vorspeisen'));
-    document.getElementById('hauptspeisen')?.addEventListener('click', () => showCategory('hauptspeisen'));
-    document.getElementById('getränke')?.addEventListener('click', () => showCategory('getränke'));
-    document.getElementById('desserts')?.addEventListener('click', () => showCategory('desserts'));
-
-    // Event-Listener für die Navigation der Thumbnails.
-    buttonLeft?.addEventListener('click', () => moveThumbnails(-1));
-    buttonRight?.addEventListener('click', () => moveThumbnails(1));
-    thumbnail1El?.addEventListener('click', () => selectThumbnail(0));
-    thumbnail2El?.addEventListener('click', () => selectThumbnail(1));
-    thumbnail3El?.addEventListener('click', () => selectThumbnail(2));
-
-    // Beim Laden der Seite direkt die erste Kategorie und ihr erstes Gericht anzeigen.
-    showCategory('vorspeisen');
-  });
-</script>
+    </script>
   </head>
 
   <body style="margin: 0px; overflow: hidden;">
-     <!-- <script type="module" src="./src/main.js"></script> -->
     <script src="bundle.js"></script>
-<div id="UI">
 
-<div id="info">
-      <div class="topinfo">
-<p id="foodname">Food Name</p>
-      <p id="price">Price</p>
-      </div>
-      
-      <p id="description">Description</p>
-      
-      <p id="allergyinfo">Allergy Information</p>
-      </div>
-      <div id="whitebar"></div>
+    <div id="UI">
 
-      
-      <div id="selectionscroll">
-        <div id="buttonleft">
-          <img src="icons/buttonleft.svg">
+      <!-- #collapsible fasst Info + Whitebar + Thumbnails zusammen.
+           Es wird per Drag nach unten weggezogen. #menubar bleibt immer sichtbar. -->
+      <div id="collapsible">
+
+ <!-- Dieser Streifen ist der Drag-Griff und der sichtbare "Peek"
+             wenn das Panel zugeklappt ist. -->
+        <div id="drag-handle">
+          <div id="drag-pill"></div>
         </div>
-<div id ="images">
-<img id="thumbnail1" class="thumbnail" src="">
-<img id="thumbnail2" class="thumbnail"  src="">
-<img id="thumbnail3" class="thumbnail"  src="">
-      </div>
-      <div id="buttonright">
-        <img src="icons/buttonright.svg">
-      </div>
-      </div>
 
+        <div id="info">
+          <div class="topinfo">
+            <p id="foodname">Food Name</p>
+            <p id="price">Price</p>
+          </div>
+          <p id="description">Description</p>
+          <p id="allergyinfo">Allergy Information</p>
+        </div>
 
-      <div id ="menubar">
+        <div id="whitebar"></div>
+
+        <div id="selectionscroll">
+          <div id="buttonleft">
+            <img src="icons/buttonleft.svg">
+          </div>
+          <div id="images">
+            <img id="thumbnail1" class="thumbnail" src="">
+            <img id="thumbnail2" class="thumbnail" src="">
+            <img id="thumbnail3" class="thumbnail" src="">
+          </div>
+          <div id="buttonright">
+            <img src="icons/buttonright.svg">
+          </div>
+        </div>
+
+       
+
+        <!-- Füllt den Spalt der durch Rubber-Band-Drag nach oben entsteht.
+             Bewegt sich automatisch mit #collapsible mit (kein JS nötig).
+             Wird von #menubar (z-index 2) verdeckt, sobald der Spalt geschlossen ist. -->
+        <div id="panel-bg"></div>
+
+      </div>
+      <!-- Ende #collapsible -->
+
+      <div id="menubar">
         <div class="menubaricon" id="vorspeisen">
           <img src="icons/vorspeisen.svg">
           <p>Vorspeisen</p>
         </div>
         <div class="menubaricon" id="hauptspeisen">
           <img src="icons/hauptspeisen.svg">
-<p>Hauptspeisen</p>
+          <p>Hauptspeisen</p>
         </div>
         <div class="menubaricon" id="getränke">
           <img src="icons/getränke.svg">
-<p>Getränke</p>
+          <p>Getränke</p>
         </div>
         <div class="menubaricon" id="desserts">
           <img src="icons/desserts.svg">
-<p>Desserts</p>
+          <p>Desserts</p>
         </div>
-
       </div>
 
     </div>
-
-
-
 
     <a-scene
       landing-page
@@ -225,23 +379,19 @@
       xrweb="disableWorldTracking: true">
 
       <a-camera position="0 4 10"></a-camera>
-
       <a-light type="directional" intensity="3" position="1 2 1" color="#ffffff"></a-light>
       <a-light type="ambient" intensity="1"></a-light>
 
-      <!-- "name" must match your image target name in the 8th Wall project dashboard -->
       <xrextras-named-image-target name="pizzatracker">
         <a-entity
           gltf-model=""
           scale="1 1 1"
           position="0 0 0"
-          rotation="90 0 0"
-          >
+          rotation="90 0 0">
         </a-entity>
       </xrextras-named-image-target>
 
     </a-scene>
-    
-    
+
   </body>
 </html>
