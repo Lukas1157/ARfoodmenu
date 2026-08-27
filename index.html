@@ -35,7 +35,7 @@
         const categories = {
           vorspeisen:   Gerichte?.filter(g => g.Art_der_Speise === 'Vorspeise'),
           hauptspeisen: Gerichte?.filter(g => g.Art_der_Speise === 'Hauptspeise'),
-          'getr\u00e4nke':    Gerichte?.filter(g => g.Art_der_Speise === 'Getr\u00e4nk'),
+          getränke:    Gerichte?.filter(g => g.Art_der_Speise === 'Getränk'),
           desserts:     Gerichte?.filter(g => g.Art_der_Speise === 'Dessert'),
         };
 
@@ -134,7 +134,7 @@
         // ── Event-Listener: Kategorie ─────────────────────────────────────────────
         document.getElementById('vorspeisen')  ?.addEventListener('click', () => showCategory('vorspeisen'));
         document.getElementById('hauptspeisen')?.addEventListener('click', () => showCategory('hauptspeisen'));
-        document.getElementById('getr\u00e4nke')      ?.addEventListener('click', () => showCategory('getr\u00e4nke'));
+        document.getElementById('getränke')      ?.addEventListener('click', () => showCategory('getränke'));
         document.getElementById('desserts')    ?.addEventListener('click', () => showCategory('desserts'));
 
         // ── Event-Listener: Navigation + Thumbnails ───────────────────────────────
@@ -305,12 +305,10 @@
 
     <div id="UI">
 
-      <!-- #collapsible fasst Info + Whitebar + Thumbnails zusammen.
-           Es wird per Drag nach unten weggezogen. #menubar bleibt immer sichtbar. -->
+      
       <div id="collapsible">
 
- <!-- Dieser Streifen ist der Drag-Griff und der sichtbare "Peek"
-             wenn das Panel zugeklappt ist. -->
+
         <div id="drag-handle">
           <div id="drag-pill"></div>
         </div>
@@ -342,13 +340,11 @@
 
        
 
-        <!-- Füllt den Spalt der durch Rubber-Band-Drag nach oben entsteht.
-             Bewegt sich automatisch mit #collapsible mit (kein JS nötig).
-             Wird von #menubar (z-index 2) verdeckt, sobald der Spalt geschlossen ist. -->
+       
         <div id="panel-bg"></div>
 
       </div>
-      <!-- Ende #collapsible -->
+      
 
       <div id="menubar">
         <div class="menubaricon" id="vorspeisen">
