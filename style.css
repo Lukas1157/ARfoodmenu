@@ -1,4 +1,23 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   Responsive Basis
+   Fast alle Maße in dieser Datei sind in rem definiert. Statt jede Regel
+   einzeln pro Breakpoint anzupassen, skalieren wir die Root-Schriftgröße:
+     - Hochformat / breite Screens (Handy → Tablet → Desktop): an vw gekoppelt
+     - Querformat mit wenig Höhe (Handy liegend): an vh gekoppelt, damit die
+       UI nicht mehr Platz beansprucht als der Screen hoch ist
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html {
+  font-size: clamp(15px, 11px + 1.1vw, 21px);
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  html {
+    font-size: clamp(11px, 5px + 2.2vh, 15px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Basis-Layout
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -11,6 +30,17 @@
   flex-direction: column;
   z-index: 1000;
   pointer-events: auto;
+}
+
+/* Tablet / Desktop: Panel nicht über die volle Breite ziehen, sondern als
+   zentrierte Karte anzeigen (sonst wirkt es auf breiten Screens ausgedünnt) */
+@media (min-width: 700px) {
+  #UI {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(calc(100% - 2rem), 40rem);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -71,6 +101,7 @@
   background: #101118;
   padding: 0.5rem 1rem;
   height: 9rem;
+  overflow-y: auto;
 }
 
 .topinfo {
@@ -81,7 +112,7 @@
 #foodname {
   font-family: Inter;
   color: #FFA600;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: normal;
 }
@@ -89,7 +120,7 @@
 #price {
   font-family: Inter;
   color: #FFA600;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: normal;
 }
@@ -98,14 +129,14 @@
   font-family: Inter;
   margin-top: -1rem;
   font-weight: 400;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: #FFFFFF;
 }
 
 #allergyinfo {
   color: #ffffff;
   font-family: Inter;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-style: normal;
   font-weight: 100;
   line-height: normal;
@@ -138,6 +169,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
   padding: 1rem 0.25rem;
 }
 
@@ -157,6 +189,16 @@
 #buttonleft,
 #buttonright {
   cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#buttonleft img,
+#buttonright img {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -173,7 +215,7 @@
   align-items: center;
   background: #303344;
   color: #B3B3B3;
-  font-size: 13px;
+  font-size: 0.8125rem;
   padding: 1rem 1rem 0 1rem;
   font-family: Inter;
   font-weight: 400;
@@ -186,11 +228,14 @@
   justify-content: center;
   cursor: pointer;
   color: #B3B3B3;
+  padding: 0.25rem 0.5rem;
 }
 
 .menubaricon img {
   filter: grayscale(1);
   pointer-events: none;
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
 .menubaricon p {
@@ -225,4 +270,26 @@
   background: #101118;
   pointer-events: none;
   z-index: 10000;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Querformat mit wenig Höhe (Handy liegend)
+   Die Root-Schriftgröße ist hier oben bereits per vh-Clamp verkleinert,
+   was den Großteil der Skalierung übernimmt. Zusätzlich wird der Info-
+   Bereich weiter verkleinert, damit auch bei langen Beschreibungen genug
+   Platz für die AR-Ansicht bleibt.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  #info {
+    height: 5rem;
+  }
+
+  #images {
+    padding: 0.5rem 0.25rem;
+  }
+
+  #menubar {
+    padding: 0.5rem 1rem 0 1rem;
+  }
 }

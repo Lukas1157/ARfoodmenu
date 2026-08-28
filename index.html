@@ -266,6 +266,22 @@
           snap(normalised <= SNAP_THRESHOLD);
         }
 
+        // ── Startzustand & Rotation ───────────────────────────────────────────────
+        // Auf einem liegenden Handy (wenig Höhe) startet das Panel eingeklappt,
+        // damit die AR-Ansicht nicht komplett verdeckt wird.
+        calcMax();
+        if (window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches) {
+          isOpen = false;
+          setY(maxY, false);
+        }
+
+        // Bei Rotation / Resize die Strecke neu berechnen und die aktuelle
+        // Position (offen/geschlossen) beibehalten, statt sie zu verlieren.
+        window.addEventListener('resize', () => {
+          calcMax();
+          setY(isOpen ? 0 : maxY, false);
+        });
+
         // ── Touch-Events (nur am Handle) ──────────────────────────────────────────
         dragHandle.addEventListener('touchstart', e => {
           onStart(e.touches[0].clientY);
